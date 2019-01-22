@@ -1,23 +1,58 @@
-const secondHand = document.querySelector('.second-hand');
-const minsHand = document.querySelector('.min-hand');
-const hourHand = document.querySelector('.hour-hand');
+'use strict';
+(function() {
+  var clock = {
 
-function setDate() {
-  const now = new Date();
+    element: document.querySelector('.outer_face'),
+    seconds: 0,
+    minutes: 0,
+    hours: 0,
+    
+    init: function() {
+      clock.hands = {
+        second: clock.element.querySelector('.second'),
+        minute: clock.element.querySelector('.minute'),
+        hour: clock.element.querySelector('.hour'),  
+      };
 
-  const seconds = now.getSeconds();
-  const secondsDegrees = ((seconds / 60) * 360) + 90;
-  secondHand.style.transform = `rotate(${secondsDegrees}deg)`;
+      this.update( new Date() );
 
-  const mins = now.getMinutes();
-  const minsDegrees = ((mins / 60) * 360) + ((seconds / 60) * 6) + 90;
-  minsHand.style.transform = `rotate(${minsDegrees}deg)`;
+      for( var hand in this.hands ) {
+        this.hands[hand].style.display = 'block';
+      }
+    },
 
-  const hour = now.getHours();
-  const hourDegrees = ((hour / 12) * 360) + ((mins / 60) * 30) + 90;
-  hourHand.style.transform = `rotate(${hourDegrees}deg)`;
-}
+    update: function( time ) {
 
-setInterval(setDate, 1000);
+      this.seconds = time.getSeconds();
+      this.minutes = time.getMinutes();
+      this.hours = time.getHours();
+      
+      this.setSecondHand();
+      this.setMinuteHand();
+      this.setHourHand();
+    },
 
-setDate();
+    setSecondHand: function() {
+      const degrees = (this.seconds / 60 * 360) - 90;
+      this.rotateHand( this.hands.second, degrees );
+    },
+
+    setMinuteHand: function() {
+      const degrees = ( ( this.minutes + this.seconds / 60 ) / 60 * 360 ) - 90;
+      this.rotateHand( this.hands.minute, degrees );
+    },
+
+    setHourHand: function() {
+      const degrees = ( (this.hours + this.minutes / 60 + this.seconds / 3600 ) / 12 * 360) - 90;
+      this.rotateHand( this.hands.hour, degrees );
+    },
+
+    rotateHand: function( hand, degrees ) {
+      degrees += 90;
+      hand.style.transform = `rotate(${degrees}deg)`;
+    },
+  };
+
+  clock.init();
+  setInterval( () => clock.update( new Date ), 1000 );
+})();
